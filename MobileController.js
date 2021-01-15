@@ -2,16 +2,20 @@ var MobileController = class {
     constructor() {
         this.AskPermission();
         this.rotation = {};
+        $(window).on("resize", () => {
+            if (!this.calibrating) return;
+            this.DisplayCalibration();
+        });
     }
 
     get isHorizontal() {
-        return screen.availHeight > screen.availWidth;
+        return screen.availWidth > screen.availHeight;
     }
 
     AskPermission() {
         Swal.fire({
             title: "Motion Sensors",
-            html: "To utilize your device's rotation for the controller, we need access to the rotation sensors of your phone.",
+            html: "To utilize your device's rotation for the controller, we need access to the rotation sensors of your device.",
             confirmButtonText: "Request",
             allowOutsideClick: false,
             allowEscapeKey: false
@@ -43,7 +47,7 @@ var MobileController = class {
                 preConfirm: (code) => {
                     Swal.showLoading();
                     return new Promise((r) => {
-                        if (window.location.hostname != "localhost") {
+                        if (window.location.hostname != "localhost" || window.location.hostname == "localhost") {
                             r(code);
                             this.DisplayCalibration();
                             return;
@@ -85,29 +89,64 @@ var MobileController = class {
         }
     }
 
-    DisplayCalibration() {
-        Swal.fire({
-            title: "Calibration",
-            html: "Please place your device on a flat surface (horizontally) facing you.",
-            allowOutsideClick: false,
-            allowEscapeKey: false,
-            showConfirmButton: false,
-            background: "transparent",
-            backdrop: "transparent",
-            showClass: {
-                popup: "swal2-noanimation"
-            },
-            hideClass: {
-                popup: ""
-            },
-            didRender: () => {
-                this.calibrationphone = $("<div/>").addClass("calibration-phone").appendTo(Swal.getContent());
-                this.calibrationspan = $("<span/>").html("Waiting\u2026").appendTo(this.calibrationphone);
-                this.calibrating = true;
-                this.calibrationIsInRange = false;
-                this.ResetCalibrationTimeout();
+    TestHorizontal() {
+        if (!this.isHorizontal) {
+            if (!this.testHorVis) {
+                this.tswalcreated = false;
+                this.testHorVis = true;
+                Swal.fire({
+                    title: "Error",
+                    html: "Please rotate your device screen horizontally for calibration.<br/>Turn off rotation lock if necessary.",
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    showConfirmButton: false,
+                    background: "transparent",
+                    backdrop: "transparent",
+                    showClass: {
+                        popup: "swal2-noanimation"
+                    },
+                    hideClass: {
+                        popup: ""
+                    }
+                });
+                this.calibrationPaused = true;
+                clearTimeout(this.calibrationTimeout);
             }
-        });
+            return true;
+        }
+    }
+
+    DisplayCalibration() {
+        this.calibrating = true;
+        if (this.TestHorizontal()) return;
+        this.testHorVis = false;
+        if (!this.tswalcreated) {
+            this.tswalcreated = true;
+            this.calibrationphone = $("<div/>").addClass("calibration-phone");
+            this.calibrationspan = $("<span/>").html("Waiting\u2026").appendTo(this.calibrationphone);
+            this.calibrationPaused = false;
+            this.calibrationIsInRange = false;
+            this.ResetCalibrationTimeout();
+            Swal.fire({
+                title: "Calibration",
+                html: "Please place your device on a flat surface with this text facing you.",
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                showConfirmButton: false,
+                background: "transparent",
+                backdrop: "transparent",
+                showClass: {
+                    popup: "swal2-noanimation"
+                },
+                hideClass: {
+                    popup: ""
+                },
+                didRender: () => {
+                    var c = $(Swal.getContent()).append(this.calibrationphone);
+                    c.css({ perspective: 500 });
+                }
+            });
+        }
     }
 
     ResetCalibrationTimeout() {
@@ -119,21 +158,23 @@ var MobileController = class {
             this.calibrationspan.css({ fontSize: 20 }).html("Calibrated!");
             anime({
                 targets: this.calibrationphone[0],
-                rotate: -90,
+                rotateZ: -90,
+                rotateX: 0,
+                rotateY: 0,
                 scale: 1.2,
                 easing: "easeOutElastic",
                 duration: 500
             });
             setTimeout(() => {
                 Swal.close();
-                console.log("a");
+                // Display controls
             }, 1000);
             console.log("Calibrated successfully! Calibration offset: %f", this.calibration);
         }, 1500);
     }
 
     Calibrate() {
-        anime.set(this.calibrationphone[0], { rotate: this.rotation.x });
+        anime.set(this.calibrationphone[0], { rotateX: this.rotation.y, rotateY: this.rotation.z, rotateZ: this.rotation.x });
         var leniency = 6; //in each direction
         var values = [this.rotation.y, this.rotation.z];
         var isInRange = values.every((v) => v >= -leniency && v <= leniency);
@@ -149,7 +190,7 @@ var MobileController = class {
         var y = e.beta;
         var z = e.gamma;
         this.rotation = { x, y, z };
-        if (this.calibrating) this.Calibrate();
+        if (this.calibrating) if (!this.calibrationPaused) this.Calibrate();
         else this.Rotate();
     }
 
