@@ -43,7 +43,11 @@ var MobileController = class {
                 preConfirm: (code) => {
                     Swal.showLoading();
                     return new Promise((r) => {
-                        if (window.location.hostname != "localhost") return r(code);
+                        if (window.location.hostname != "localhost") {
+                            r(code);
+                            this.DisplayCalibration();
+                            return;
+                        }
                         var url = window.location.hostname == "localhost" ? "http://localhost:2223" : "https://ktane-mobilecontroller.herokuapp.com";
                         var e = () => {
                             Swal.hideLoading();
