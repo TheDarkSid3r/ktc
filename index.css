@@ -1,0 +1,60 @@
+@font-face {
+    font-family: "Trebuchet MS";
+    font-style: normal;
+    font-weight: normal;
+    src: local("Trebuchet MS"), local("Trebuchet"), url(fonts/trebuc.ttf);
+}
+
+@font-face {
+    font-family: "Trebuchet MS";
+    font-style: normal;
+    font-weight: bold;
+    src: local("Trebuchet MS Bold"), local("Trebuchet Bold"), url(fonts/trebucbd.ttf);
+}
+
+@font-face {
+    font-family: "Trebuchet MS";
+    font-style: italic;
+    font-weight: normal;
+    src: local("Trebuchet MS Italic"), local("Trebuchet Italic"), url(fonts/trebucit.ttf);
+}
+
+@font-face {
+    font-family: "Trebuchet MS";
+    font-style: italic;
+    font-weight: bold;
+    src: local("Trebuchet MS Bold Italic"), local("Trebuchet Bold Italic"), url(fonts/trebucbi.ttf);
+}
+
+body {
+    margin: 0;
+    color: #000;
+}
+
+* {
+    line-height: 100%;
+    font-family: "Trebuchet MS";
+}
+
+.swal2-title, .swal2-content {
+    color: #000;
+}
+
+.calibration-phone {
+    position: relative;
+    width: 130px;
+    height: 170px;
+    border: 1.2px solid #000;
+    margin: 30px auto 0;
+    border-radius: 10px;
+}
+
+.calibration-phone>span {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 100%;
+    transform: translateY(-50%) rotate(90deg);
+    font-weight: 700;
+    font-size: 22px;
+}
