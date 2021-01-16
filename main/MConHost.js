@@ -42,13 +42,16 @@ var MConHost = class {
                 if (data.roomnotfound) err();
                 console.log(data);
                 if (data.rotation) {
-                    anime({
+                    /* anime({
                         targets: ".cube",
-                        rotateY: data.rotation.x,
-                        rotateZ: data.rotation.z,
-                        rotateX: -(data.rotation.y + 90),
+                        
                         duration: 100,
                         easing: "linear"
+                    }); */
+                    anime.set(".cube", {
+                        rotateZ: data.rotation.z,
+                        rotateY: data.rotation.x,
+                        rotateX: -(data.rotation.y + 90)
                     });
                 }
             };

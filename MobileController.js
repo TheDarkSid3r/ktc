@@ -53,6 +53,7 @@ var MobileController = class {
                             return;
                         } */
                         var e = () => {
+                            this.connected = false;
                             Swal.hideLoading();
                             Swal.showValidationMessage("Invalid connection code.");
                         };
@@ -126,7 +127,10 @@ var MobileController = class {
     }
 
     DisplayCalibration() {
-        setInterval(() => this.socket.send(JSON.stringify({ rotation: this.rotation })), 100);
+        setInterval(() => {
+            if (!this.connected) return;
+            this.socket.send(JSON.stringify({ rotation: this.rotation }));
+        }, 50);
         /* this.calibrating = true;
         if (this.TestHorizontal()) return;
         this.testHorVis = false;
