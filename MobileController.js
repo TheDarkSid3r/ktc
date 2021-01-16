@@ -9,7 +9,7 @@ var MobileController = class {
     }
 
     get isHorizontal() {
-        return screen.availWidth > screen.availHeight;
+        return window.innerWidth > window.innerHeight;
     }
 
     AskPermission() {
