@@ -2,10 +2,10 @@ var MobileController = class {
     constructor() {
         this.AskPermission();
         this.rotation = {};
-        window.addEventListener("resize", () => {
+        /* window.addEventListener("resize", () => {
             if (!this.calibrating) return;
             this.DisplayCalibration();
-        }, false);
+        }, false); */
     }
 
     get isHorizontal() {
@@ -47,26 +47,31 @@ var MobileController = class {
                 preConfirm: (code) => {
                     Swal.showLoading();
                     return new Promise((r) => {
-                        if (window.location.hostname != "localhost" || window.location.hostname == "localhost") {
+                        /* if (window.location.hostname != "localhost" || window.location.hostname == "localhost") {
                             r(code);
                             this.DisplayCalibration();
                             return;
-                        }
-                        var url = window.location.hostname == "localhost" ? "http://localhost:2223" : "https://ktane-mobilecontroller.herokuapp.com";
+                        } */
                         var e = () => {
                             Swal.hideLoading();
-                            Swal.showValidationMessage("Invalid connection code");
+                            Swal.showValidationMessage("Invalid connection code.");
                         };
-                        $.post(url + "/room", { code }, (s) => {
+                        $.post(MConConstants.ServerURL + "/room?code=" + code, (s) => {
                             if (s.roomnotfound) return e();
-                            this.socket = new WebSocket(url + "?type=controller&code=" + code);
+                            this.socket = new WebSocket(MConConstants.SocketURL + "?type=controller&code=" + code);
                             this.socket.onerror = e;
                             this.socket.onclose = e;
                             this.socket.onmessage = (ev) => {
                                 var data = JSON.parse(ev.data);
                                 if (data.roomnotfound) e();
+                                console.log(data);
                             };
-                            this.socket.onopen = () => this.connected = true;
+                            this.socket.onopen = () => {
+                                this.connected = true;
+                                r(code);
+                                this.DisplayCalibration();
+                                console.log("WebSocket opened");
+                            };
                         }).catch(e);
                         /* setTimeout(() => {
                             r(code);
@@ -116,8 +121,13 @@ var MobileController = class {
         }
     }
 
+    SetupDisplay() {
+
+    }
+
     DisplayCalibration() {
-        this.calibrating = true;
+        setInterval(() => this.socket.send(JSON.stringify({ rotation: this.rotation })), 100);
+        /* this.calibrating = true;
         if (this.TestHorizontal()) return;
         this.testHorVis = false;
         if (!this.tswalcreated) {
@@ -146,7 +156,7 @@ var MobileController = class {
                     c.css({ perspective: 500 });
                 }
             });
-        }
+        } */
     }
 
     ResetCalibrationTimeout() {
@@ -196,5 +206,6 @@ var MobileController = class {
 
     Rotate() {
         if (!this.connected) return;
+
     }
 };
