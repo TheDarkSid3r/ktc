@@ -2,10 +2,10 @@ var MobileController = class {
     constructor() {
         this.AskPermission();
         this.rotation = {};
-        $(window).on("resize", () => {
+        window.addEventListener("resize", () => {
             if (!this.calibrating) return;
             this.DisplayCalibration();
-        });
+        }, false);
     }
 
     get isHorizontal() {
