@@ -1,0 +1,16 @@
+body {
+    perspective: 500px;
+}
+
+body, html {
+    min-height: 100vh;
+}
+
+.cube {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 200px;
+    height: 300px;
+    border: 2px solid #000;
+}

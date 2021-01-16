@@ -1,5 +1,6 @@
 var MConHost = class {
     constructor() {
+        anime.set(".cube", { translateX: "-50%", translateY: "-50%" });
         Swal.fire({
             title: "Connecting\u2026",
             allowOutsideClick: false,
@@ -40,10 +41,21 @@ var MConHost = class {
                 var data = JSON.parse(ev.data);
                 if (data.roomnotfound) err();
                 console.log(data);
+                if (data.rotation) {
+                    anime({
+                        targets: ".cube",
+                        rotateY: data.rotation.x,
+                        rotateZ: data.rotation.z,
+                        rotateX: -(data.rotation.y + 90),
+                        duration: 100,
+                        easing: "linear"
+                    });
+                }
             };
             this.socket.onopen = () => {
                 this.connected = true;
                 console.log("WebSocket opened");
+                Swal.close();
             };
         }).catch(err);
     }
